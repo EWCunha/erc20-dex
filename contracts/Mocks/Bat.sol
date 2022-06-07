@@ -1,10 +1,9 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 
-contract Bat is ERC20, ERC20Detailed {
-    constructor() public ERC20Detailed("BAT", "Brave browser token", 18) {}
+contract Bat is ERC20 {
+    constructor() public ERC20("BAT", "Brave browser token") {}
 
     function faucet(address to, uint256 amount) external {
         _mint(to, amount);
