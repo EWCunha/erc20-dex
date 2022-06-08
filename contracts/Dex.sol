@@ -52,8 +52,27 @@ contract Dex {
         admin = msg.sender;
     }
 
-    function addToken(bytes32 ticker, address tokenAdress) external onlyAdmin {
-        tokens[ticker] = Token(ticker, tokenAdress);
+    function getOrders(bytes32 ticker, Side side)
+        external
+        view
+        returns (Order[] memory)
+    {
+        return orderBook[ticker][uint256(side)];
+    }
+
+    function getTokens() external view returns (Token[] memory) {
+        Token[] memory _tokens = new Token[](tokenList.length);
+        for (uint256 i = 0; i < tokenList.length; i++) {
+            _tokens[i] = Token(
+                tokens[tokenList[i]].ticker,
+                tokens[tokenList[i]].tokenAddress
+            );
+        }
+        return _tokens;
+    }
+
+    function addToken(bytes32 ticker, address tokenAddress) external onlyAdmin {
+        tokens[ticker] = Token(ticker, tokenAddress);
         tokenList.push(ticker);
     }
 
@@ -76,7 +95,7 @@ contract Dex {
     {
         require(
             traderBalances[msg.sender][ticker] >= amount,
-            "Not enough balance"
+            "balance too low"
         );
         traderBalances[msg.sender][ticker] = traderBalances[msg.sender][ticker]
             .sub(amount);
@@ -92,12 +111,12 @@ contract Dex {
         if (side == Side.SELL) {
             require(
                 traderBalances[msg.sender][ticker] >= amount,
-                "Token balance too low"
+                "token balance too low"
             );
         } else {
             require(
                 traderBalances[msg.sender][DAI] >= amount.mul(price),
-                "DAI balance too low"
+                "dai balance too low"
             );
         }
         Order[] storage orders = orderBook[ticker][uint256(side)];
@@ -114,7 +133,6 @@ contract Dex {
             )
         );
 
-        // bubble sort algorithm
         uint256 i = orders.length > 0 ? orders.length - 1 : 0;
         while (i > 0) {
             if (side == Side.BUY && orders[i - 1].price > orders[i].price) {
@@ -126,9 +144,9 @@ contract Dex {
             Order memory order = orders[i - 1];
             orders[i - 1] = orders[i];
             orders[i] = order;
-            i = i.sub(1);
+            i--;
         }
-        nextOrderId = nextOrderId.add(1);
+        nextOrderId++;
     }
 
     function createMarketOrder(
@@ -139,10 +157,9 @@ contract Dex {
         if (side == Side.SELL) {
             require(
                 traderBalances[msg.sender][ticker] >= amount,
-                "Token balance too low"
+                "token balance too low"
             );
         }
-
         Order[] storage orders = orderBook[ticker][
             uint256(side == Side.BUY ? Side.SELL : Side.BUY)
         ];
@@ -171,16 +188,16 @@ contract Dex {
                 traderBalances[msg.sender][DAI] = traderBalances[msg.sender][
                     DAI
                 ].add(matched.mul(orders[i].price));
-
-                traderBalances[orders[i].trader][DAI] = traderBalances[
+                traderBalances[orders[i].trader][ticker] = traderBalances[
                     orders[i].trader
-                ][DAI].add(matched.mul(orders[i].price));
+                ][ticker].add(matched);
                 traderBalances[orders[i].trader][DAI] = traderBalances[
                     orders[i].trader
                 ][DAI].sub(matched.mul(orders[i].price));
-            } else {
+            }
+            if (side == Side.BUY) {
                 require(
-                    traderBalances[msg.sender][ticker] >=
+                    traderBalances[msg.sender][DAI] >=
                         matched.mul(orders[i].price),
                     "dai balance too low"
                 );
@@ -190,63 +207,42 @@ contract Dex {
                 traderBalances[msg.sender][DAI] = traderBalances[msg.sender][
                     DAI
                 ].sub(matched.mul(orders[i].price));
-
-                traderBalances[orders[i].trader][DAI] = traderBalances[
+                traderBalances[orders[i].trader][ticker] = traderBalances[
                     orders[i].trader
-                ][DAI].sub(matched.mul(orders[i].price));
+                ][ticker].sub(matched);
                 traderBalances[orders[i].trader][DAI] = traderBalances[
                     orders[i].trader
                 ][DAI].add(matched.mul(orders[i].price));
             }
+            nextTradeId++;
+            i++;
+        }
 
-            nextTradeId = nextTradeId.add(1);
-            i = i.add(1);
-
-            i = 0;
-            while (i < orders.length && orders[i].filled == orders[i].amount) {
-                for (uint256 j = i; j < orders.length - 1; j++) {
-                    orders[j] = orders[j + 1];
-                }
-                orders.pop();
-                i = i.add(1);
+        i = 0;
+        while (i < orders.length && orders[i].filled == orders[i].amount) {
+            for (uint256 j = i; j < orders.length - 1; j++) {
+                orders[j] = orders[j + 1];
             }
+            orders.pop();
+            i++;
         }
-    }
-
-    function getOrders(bytes32 ticker, Side side)
-        external
-        view
-        returns (Order[] memory)
-    {
-        return orderBook[ticker][uint256(side)];
-    }
-
-    function getTokens() external view returns (Token[] memory) {
-        Token[] memory _tokens = new Token[](tokenList.length);
-        for (uint256 i = 0; i < tokenList.length; i++) {
-            _tokens[i] = Token(
-                tokens[tokenList[i]].ticker,
-                tokens[tokenList[i]].tokenAddress
-            );
-        }
-        return _tokens;
     }
 
     modifier tokenIsNotDai(bytes32 ticker) {
-        require(ticker != DAI, "Cannot trade DAI.");
+        require(ticker != DAI, "cannot trade DAI");
         _;
     }
 
     modifier tokenExist(bytes32 ticker) {
         require(
             tokens[ticker].tokenAddress != address(0),
-            "Token not allowed."
+            "this token does not exist"
         );
         _;
     }
 
     modifier onlyAdmin() {
-        require(msg.sender == admin, "Only admin is allowed.");
+        require(msg.sender == admin, "only admin");
         _;
     }
 }
