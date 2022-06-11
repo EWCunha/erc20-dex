@@ -175,4 +175,4 @@ function App({ web3, accounts, contracts }) {
   );
 }
 
-export default App;
+export default App
