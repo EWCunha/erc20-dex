@@ -44,6 +44,13 @@ module.exports = {
         "https://rinkeby.infura.io/v3/f8259394a05e48279797902af1ae3c7d"
       ),
       network_id: 4
+    },
+    goerli: {
+      provider: () => new provider(
+        secrets.privateKeys,
+        "https://goerli.infura.io/v3/f8259394a05e48279797902af1ae3c7d"
+      ),
+      network_id: 5
     }
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
