@@ -136,11 +136,20 @@ module.exports = async function (deployer, network, accounts) {
         await deployer.deploy(Dex)
         const dex = await Dex.deployed()
 
-        await Promise.all([
-            dex.addToken(DAI, "0x95b58a6Bff3D14B7DB2f5cb5F0Ad413DC2940658"),
-            dex.addToken(BAT, "0xDA5B056Cfb861282B4b59d29c9B395bcC238D29B"),
-            dex.addToken(REP, "0x9Cac8508b9ff26501439590a24893D80e7E84D21"),
-            dex.addToken(ZRX, "0xDB7F2B9f6a0cB35FE5D236e5ed871D3aD4184290")
-        ])
+        if (network === "rinkeby") {
+            await Promise.all([
+                dex.addToken(DAI, "0x95b58a6Bff3D14B7DB2f5cb5F0Ad413DC2940658"),
+                dex.addToken(BAT, "0xDA5B056Cfb861282B4b59d29c9B395bcC238D29B"),
+                dex.addToken(REP, "0x9Cac8508b9ff26501439590a24893D80e7E84D21"),
+                dex.addToken(ZRX, "0xDB7F2B9f6a0cB35FE5D236e5ed871D3aD4184290")
+            ])
+        } else if (network === "goerli") {
+            await Promise.all([
+                dex.addToken(DAI, "0x73967c6a0904aA032C103b4104747E88c566B1A2"),
+                dex.addToken(BAT, "0x70cBa46d2e933030E2f274AE58c951C800548AeF"),
+                dex.addToken(REP, "0xaAed23A7673412667eC581B0f20A8377bD099B95"),
+                dex.addToken(ZRX, "0xe4E81Fa6B16327D4B78CFEB83AAdE04bA7075165")
+            ])
+        }
     }
 }
