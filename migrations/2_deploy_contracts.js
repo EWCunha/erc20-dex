@@ -12,26 +12,8 @@ const SIDE = {
     SELL: 1
 }
 
-const amount = web3.utils.toWei('1000')
-const seedTokenBalance = async (token, trader) => {
-    await token.faucet(trader, amount)
-    await token.approve(
-        dex.address,
-        amount,
-        { from: trader }
-    )
-    const ticker = await token.name()
-    await dex.deposit(
-        amount,
-        web3.utils.fromAscii(ticker),
-        { from: trader }
-    )
-}
-
 module.exports = async function (deployer, network, accounts) {
-    // const network = config.network
-
-    if (network === "development") {
+    if (network === "develop") {
         const [trader1, trader2, trader3, trader4, _] = accounts
         await Promise.all([Dai, Bat, Rep, Zrx, Dex].map(
             contract => deployer.deploy(contract))
@@ -46,6 +28,22 @@ module.exports = async function (deployer, network, accounts) {
             dex.addToken(REP, rep.address),
             dex.addToken(ZRX, zrx.address)
         ])
+
+        const amount = web3.utils.toWei('1000')
+        const seedTokenBalance = async (token, trader) => {
+            await token.faucet(trader, amount)
+            await token.approve(
+                dex.address,
+                amount,
+                { from: trader }
+            )
+            const ticker = await token.name()
+            await dex.deposit(
+                amount,
+                web3.utils.fromAscii(ticker),
+                { from: trader }
+            )
+        }
 
         await seedTokenBalance(dai, trader1)
         await seedTokenBalance(bat, trader1)
