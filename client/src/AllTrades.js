@@ -46,6 +46,7 @@ const AllTrades = ({ trades }) => {
         );
     }
 
+    // return
     return (
         <div className="card">
             <h2 className="card-title">All trades</h2>
