@@ -11,7 +11,7 @@ Use the following faucets to get some fake ETH:
 - Rinkeby: https://rinkebyfaucet.com/ or https://faucets.chain.link/rinkeby
 - Goerli/Görli: https://goerlifaucet.com/ or https://faucets.chain.link/goerli
 
-The, go to [Uniswap](https://app.uniswap.org/) and swap some ETH to DAI, in order to test the live dApp. Just be sure that the wallet is connected to one of the testnets. 
+Then, go to [Uniswap](https://app.uniswap.org/) and swap some ETH to DAI, in order to test the live dApp. Just be sure that the wallet is connected to one of the testnets. 
 
 Have fun!
 
