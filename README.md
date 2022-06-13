@@ -39,3 +39,9 @@ npm start
 This will install the frontend dependecies and start the dApp. You will also need to add the local blockchain on your Metamask wallet.
 
 Have fun!
+
+## Guide
+1. Send some DAI to the DEX
+2. Create a Limit or Market order with any of the other tokens
+3. If there is a match in the orders, they will be fulfilled
+4. Withdraw DAI
